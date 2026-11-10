@@ -24,13 +24,24 @@ set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/raylib EXCLUDE_FROM_ALL)
 
 # ---------------------------------------------------------------------------
+# containers: our custom templates in src/containers/
+# (CircularList.h, SinglyLinkedList.h).
+# A header-only (INTERFACE) library: templates have nothing to compile on
+# their own - they're compiled inside whatever includes them. Linking to it
+# gives a target the src/ include path, so it can write
+#   #include "containers/CircularList.h"
+# ---------------------------------------------------------------------------
+add_library(containers INTERFACE)
+target_include_directories(containers INTERFACE ${CMAKE_SOURCE_DIR}/src)
+
+# ---------------------------------------------------------------------------
 # The game. Every .cpp under src/ is included automatically.
 # ---------------------------------------------------------------------------
 file(GLOB_RECURSE GAME_SOURCES CONFIGURE_DEPENDS ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 add_executable(Game ${GAME_SOURCES})
 target_include_directories(Game PRIVATE ${CMAKE_SOURCE_DIR}/src)
-target_link_libraries(Game PRIVATE raylib)
+target_link_libraries(Game PRIVATE raylib containers)
 
 if(MSVC)
     target_compile_options(Game PRIVATE /W4 /permissive-)
