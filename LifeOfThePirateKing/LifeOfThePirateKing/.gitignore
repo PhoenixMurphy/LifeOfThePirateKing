@@ -1,0 +1,83 @@
+# ==========================================================================
+#  Life of The Pirate King - .gitignore
+#  Keeps: src/, assets/, external/raylib/, benchmark/, CMakeLists.txt,
+#         build/run scripts, README, and the shared .vscode/*.json config.
+# ==========================================================================
+
+# --- Build output ----------------------------------------------------------
+build/
+build-*/
+out/
+bin/
+cmake-build-*/
+
+# --- CMake files generated in the wrong place (in-source builds) -----------
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+_deps/
+compile_commands.json
+CMakeUserPresets.json
+
+# --- Compiled files --------------------------------------------------------
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.idb
+
+# --- VS Code ---------------------------------------------------------------
+# Keep the shared tasks/launch/settings/extensions, ignore personal/cache stuff
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
+.vscode/ipch/
+*.code-workspace
+.history/
+
+# --- Visual Studio ---------------------------------------------------------
+.vs/
+*.user
+*.suo
+*.sln.docstates
+x64/
+x86/
+Debug/
+Release/
+RelWithDebInfo/
+MinSizeRel/
+
+# --- Other IDEs ------------------------------------------------------------
+.idea/
+.cache/
+*.swp
+*~
+
+# --- OS junk ---------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# --- Files the game writes at runtime --------------------------------------
+highscores.txt
+*.log
+
+# --- Benchmark output (keep the chart you submit, not every run) ----------
+benchmark/results*.csv
+
+# --- Submission zips -------------------------------------------------------
+*.zip
+*.7z

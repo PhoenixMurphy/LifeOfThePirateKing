@@ -1,0 +1,38 @@
+{
+    // F5 builds (Debug) then starts the game under the debugger.
+    // In the Run and Debug panel pick the one matching your compiler.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug - GCC / GDB",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/Game",
+            "windows": {
+                "program": "${workspaceFolder}/build/bin/Game.exe",
+                "miDebuggerPath": "gdb.exe"
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}/build/bin",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "preLaunchTask": "Build (Debug)",
+            "setupCommands": [
+                { "description": "Pretty-print STL containers", "text": "-enable-pretty-printing", "ignoreFailures": true }
+            ]
+        },
+        {
+            "name": "Debug - Visual Studio (MSVC)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/Game.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/build/bin",
+            "stopAtEntry": false,
+            "console": "integratedTerminal",
+            "preLaunchTask": "Build (Debug)"
+        }
+    ]
+}

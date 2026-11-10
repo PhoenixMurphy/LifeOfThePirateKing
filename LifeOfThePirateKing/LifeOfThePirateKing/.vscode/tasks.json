@@ -1,0 +1,40 @@
+{
+    // Ctrl+Shift+B runs "Build (Debug)". Works on Windows (build.bat) and Linux (build.sh).
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build (Debug)",
+            "type": "shell",
+            "command": "./build.sh",
+            "windows": { "command": ".\\build.bat" },
+            "args": ["debug"],
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": ["$gcc", "$msCompile"]
+        },
+        {
+            "label": "Build (Release)",
+            "type": "shell",
+            "command": "./build.sh",
+            "windows": { "command": ".\\build.bat" },
+            "args": ["release"],
+            "group": "build",
+            "problemMatcher": ["$gcc", "$msCompile"]
+        },
+        {
+            "label": "Run",
+            "type": "shell",
+            "command": "./build/bin/Game",
+            "windows": { "command": ".\\build\\bin\\Game.exe" },
+            "dependsOn": "Build (Debug)",
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "./build.sh",
+            "windows": { "command": ".\\build.bat" },
+            "args": ["clean"],
+            "problemMatcher": []
+        }
+    ]
+}

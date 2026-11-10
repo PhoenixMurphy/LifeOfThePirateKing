@@ -1,0 +1,22 @@
+{
+    // IntelliSense: use the exact flags CMake used (written by the build),
+    // falling back to these include paths before the first build.
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/src",
+        "${workspaceFolder}/external/raylib/src"
+    ],
+
+    // If you also install the CMake Tools extension, keep it on the same folder
+    // and stop it asking to configure every time the project opens.
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.configureOnOpen": false,
+
+    "files.exclude": {
+        "build/CMakeFiles": true
+    },
+    "files.eol": "\n",
+    "[bat]": { "files.eol": "\r\n" }
+}
