@@ -1,7 +1,7 @@
 #include "entities/BulletManager.h"
 #include "world/Arena.h"
 
-BulletManager::BulletManger()
+BulletManager::BulletManager()
 {
 	m_bullets.reserve(256);
 }
@@ -26,8 +26,8 @@ void BulletManager::Update(float dt, const Arena& arena)
 	for (std::size_t i = 0; i < m_bullets.size();)
 	{
 		Bullet& bullet = m_bullets[i];
-		bullet.position += bullet.velocity.x * dt;
-		bullet.position += bullet.velocity.y * dt;
+		bullet.position.x += bullet.velocity.x * dt;
+		bullet.position.y += bullet.velocity.y * dt;
 
 		if (arena.CircleHitsSolid(bullet.position, bullet.radius))
 		{

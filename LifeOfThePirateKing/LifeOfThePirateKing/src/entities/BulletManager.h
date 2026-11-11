@@ -11,7 +11,7 @@ class Arena;
 class BulletManager
 {
 public:
-	BulletManger();
+	BulletManager();
 
 	void Spawn(Vector2 position, Vector2 velocity, float radius);
 
