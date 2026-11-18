@@ -68,6 +68,7 @@ void Arena::LoadFromStrings(const std::vector<std::string>& rows)
             {
             case '#': tile = Tile::Wall; break;
             case 'G':
+            {
                 tile = Tile::Gate;
                 const int edge = EdgeOf(x, y, m_width, m_height);
                 if (edge >= 0)
@@ -77,6 +78,7 @@ void Arena::LoadFromStrings(const std::vector<std::string>& rows)
                     gateSum[edge].y += centre.y;
                     ++gateCount[edge];
                 }
+            }
                 break;
             case 'P':
                 m_playerStart = TileCentre(x, y); // the tile itself is floor

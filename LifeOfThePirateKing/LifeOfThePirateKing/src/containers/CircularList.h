@@ -46,23 +46,14 @@ public:
 	// goes to the first one again
 	void Advance()
 	{
-		if (m_tail == nullptr)
-		{
+		if (m_current != nullptr)
 			m_current = m_current->next;
-		}
 	}
 
 	// The element in the current node, nullptr if it is empty
 	T* Current()
 	{
-		if (m_current != nullptr)
-		{
-			return &m_current->data;
-		}
-		else
-		{
-			return nullptr;
-		}
+		return m_current ? &m_current->data : nullptr;
 	}
 
 	const T* Current() const
@@ -122,7 +113,7 @@ public:
 
 	std::size_t Size()
 	{
-		return m_size
+		return m_size;
 	}
 
 private:

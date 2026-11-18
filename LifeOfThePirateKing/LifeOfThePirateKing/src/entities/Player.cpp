@@ -58,9 +58,28 @@ void Player::Update(float dt, const Arena& arena, BulletManager& bullets)
 		shoot.x += 1.0f;
 	}
 
+	// Mouse: hold the left button to shoot towards the cursor.
+	// The direction is from the player to the mouse; TryShoot normalises it.
+	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+	{
+		const Vector2 mouse = GetMousePosition();
+		shoot = Vector2{ mouse.x - m_position.x, mouse.y - m_position.y };
+	}
+
+	// A fresh press of an arrow key or the mouse button always fires straight
+	// away, so every tap shoots. Holding the button still fires at the
+	// FireCooldown rate.
+	const bool newPress = IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN) ||
+		IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_RIGHT) ||
+		IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
 	Move(move, dt, arena);
 
 	m_fireTimer -= dt;
+	if (newPress)
+	{
+		m_fireTimer = 0.0f;   // skip the rest of the cooldown for this shot
+	}
 	TryShoot(shoot, bullets);
 }
 
@@ -116,7 +135,7 @@ void Player::Draw() const
 {
 	const Vector2 gunEnd = Vector2Add(m_position, Vector2Scale(m_aim, Config::PlayerRadius + 14.0f));
 	DrawLineEx(m_position, gunEnd, 6.0f, DARKGRAY);
-	
+
 	DrawCircleV(m_position, Config::PlayerRadius + 2.0f, BLACK);
 	DrawCircleV(m_position, Config::PlayerRadius, Color{ 245, 205, 160, 255 });
 	DrawCircleSector(m_position, Config::PlayerRadius, 180.0f, 360.0f, 16, MAROON);
