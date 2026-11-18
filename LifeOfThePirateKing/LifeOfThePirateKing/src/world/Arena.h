@@ -12,6 +12,12 @@ enum class Tile : unsigned char
 	Gate
 };
 
+struct Gate
+{
+	Vector2 position{ 0.0f,0.0f };
+	const char* name = "";
+};
+
 class Arena
 {
 public:
@@ -42,6 +48,8 @@ public:
 
 	bool IsSolid(int x, int y) const;
 
+	bool IsWall(int x, int y) const;
+
 	// world helpers
 	int WorldToTileX(float worldX) const;
 	int WorldToTileY(float worldY) const;
@@ -50,23 +58,27 @@ public:
 
 	bool CircleHitsSolid(Vector2 centre, float radius) const;
 
+	bool CircleHitsWall(Vector2 centre, float radius) const;
+
 	Vector2 PlayerStart() const
 	{
 		return m_playerStart;
 	}
 
-	const std::vector<Vector2>& GateCentres() const
+	const std::vector<Gate>& Gates() const
 	{
-		return m_gateCentres;
+		return m_gates;
 	}
 
 	void Draw() const;
 
 private:
+	bool CircleHits(Vector2 centre, float radius, bool gatesBlock) const;
+
 	int m_width;
 	int m_height;
 	std::vector<Tile> m_tiles;
 
 	Vector2 m_playerStart{ 0.0f, 0.0f };
-	std::vector<Vector2> m_gateCentres;
+	std::vector<Gate> m_gates;
 };

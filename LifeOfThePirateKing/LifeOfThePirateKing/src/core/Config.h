@@ -25,6 +25,12 @@ namespace Config
 	constexpr float BulletSpeed = TileSize * 12.0f;
 	constexpr float BulletRadius = TileSize * 0.1f;
 
+	// Constants used for Emenies and the waves
+	constexpr float SpawnInterval = 0.8f;
+	constexpr float WaveBreak = 3.0f;
+	constexpr float RespawnDelay = 2.0f;
+	constexpr float HitFlashTime = 0.1f;
+
 	//Constants used for the Level
 	constexpr float LevelDuration = 60.0f; // how long you need to survive
 }

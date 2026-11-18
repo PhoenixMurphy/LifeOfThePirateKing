@@ -39,6 +39,12 @@ public:
 		return m_lives > 0;
 	}
 
+	void Respawn(Vector2 position)
+	{
+		m_position = position;
+		m_fireTimer = 0.0f;
+	}
+
 	void AddCoins(int amount)
 	{
 		m_fireTimer += amount;

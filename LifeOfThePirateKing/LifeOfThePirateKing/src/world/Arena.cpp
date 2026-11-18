@@ -13,6 +13,31 @@ Arena::Arena() :
 {
 }
 
+static int EdgeOf(int x, int y, int width, int  height)
+{
+    if (y == 0)
+    {
+        return 0;
+    }
+
+    if (x == width - 1)
+    {
+        return 1;
+    }
+
+    if (y == height - 1)
+    {
+        return 2;
+    }
+
+    if (x == 0)
+    {
+        return 3;
+    }
+
+    return -1;
+}
+
 void Arena::LoadFromStrings(const std::vector<std::string>& rows)
 {
     if (static_cast<int>(rows.size()) != m_height)
@@ -21,8 +46,10 @@ void Arena::LoadFromStrings(const std::vector<std::string>& rows)
             static_cast<int>(rows.size()), m_height);
     }
 
-    m_gateCentres.clear();
+    m_gates.clear();
     m_playerStart = TileCentre(m_width / 2, m_height / 2);
+    Vector2 gateSum[4] = {};
+    int gateCount[4] = {};
 
     for (int y = 0; y < m_height; ++y)
     {
@@ -42,7 +69,14 @@ void Arena::LoadFromStrings(const std::vector<std::string>& rows)
             case '#': tile = Tile::Wall; break;
             case 'G':
                 tile = Tile::Gate;
-                m_gateCentres.push_back(TileCentre(x, y));
+                const int edge = EdgeOf(x, y, m_width, m_height);
+                if (edge >= 0)
+                {
+                    const Vector2 centre = TileCentre(x, y);
+                    gateSum[edge].x += centre.x;
+                    gateSum[edge].y += centre.y;
+                    ++gateCount[edge];
+                }
                 break;
             case 'P':
                 m_playerStart = TileCentre(x, y); // the tile itself is floor
@@ -52,6 +86,21 @@ void Arena::LoadFromStrings(const std::vector<std::string>& rows)
 
             m_tiles[static_cast<std::size_t>(Index(x, y))] = tile;
         }
+    }
+
+    const char* edgeNames[4] = { "North", "East", "South", "West" };
+    for (int edge = 0; edge < 4; ++edge)
+    {
+        if (gateCount[edge] == 0)
+        {
+            continue;
+        }
+
+        const float numberOfTiles = static_cast<float>(gateCount[edge]);
+        Gate gate;
+        gate.position = Vector2{ gateSum[edge].x / numberOfTiles, gateSum[edge].y / numberOfTiles };
+        gate.name = edgeNames[edge];
+        m_gates.push_back(gate);
     }
 }
 
@@ -72,6 +121,11 @@ Tile Arena::GetTile(int x, int y) const
 bool Arena::IsSolid(int x, int y) const
 {
     return GetTile(x, y) != Tile::Floor;
+}
+
+bool Arena::IsWall(int x, int y) const
+{
+    return GetTile(x, y) == Tile::Wall;
 }
 
 int Arena::WorldToTileX(float worldX) const
@@ -100,6 +154,16 @@ Rectangle Arena::TileRect(int x, int y) const
 
 bool Arena::CircleHitsSolid(Vector2 centre, float radius) const
 {
+    return CircleHits(centre, radius, true);
+}
+
+bool Arena::CircleHitsWall(Vector2 centre, float radius) const
+{
+    return CircleHits(centre, radius, false);
+}
+
+bool Arena::CircleHits(Vector2 centre, float radius, bool gatesBlock) const
+{
     // Checks the tiles surrounding the circle, not all the tiles
     const int minX = WorldToTileX(centre.x - radius);
     const int maxX = WorldToTileX(centre.x + radius);
@@ -110,8 +174,19 @@ bool Arena::CircleHitsSolid(Vector2 centre, float radius) const
     {
         for (int x = minX; x <= maxX; ++x)
         {
-            if (IsSolid(x, y) && CheckCollisionCircleRec(centre, radius, TileRect(x, y)))
+            bool blocks;
+            if (gatesBlock)
+            {
+                blocks = IsSolid(x, y);
+            }
+            else
+            {
+                blocks = IsWall(x, y);
+            }
+            if (blocks && CheckCollisionCircleRec(centre, radius, TileRect(x, y)))
+            {
                 return true;
+            }
         }
     }
     return false;
