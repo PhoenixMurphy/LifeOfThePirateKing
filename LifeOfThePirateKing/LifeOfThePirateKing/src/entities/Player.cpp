@@ -13,6 +13,11 @@ void Player::Reset(Vector2 startPosition)
 	m_fireTimer = 0.0f;
 	m_lives = Config::StartingLives;
 	m_coins = 0;
+	m_score = 0;
+
+	m_speedScale = 1.0f;
+	m_cooldownScale = 1.0f;
+	m_bulletScale = 1.0f;
 }
 
 float Player::Radius() const
@@ -92,7 +97,7 @@ void Player::Move(Vector2 direction, float dt, const Arena& arena)
 
 	// Makes it so moving diagonals isn't faster
 	direction = Vector2Normalize(direction);
-	const float step = Config::PlayerSpeed * dt;
+	const float step = Config::PlayerSpeed * m_speedScale * dt;
 
 	Vector2 tryX{ m_position.x + direction.x * step, m_position.y };
 	if (!arena.CircleHitsSolid(tryX, Config::PlayerRadius))
@@ -125,9 +130,9 @@ bool Player::TryShoot(Vector2 direction, BulletManager& bullets)
 	// Spawns the bullets just outside of the player
 	const Vector2 muzzle = Vector2Add(m_position, Vector2Scale(direction, Config::PlayerRadius + 2.0f));
 	const Vector2 velocity = Vector2Scale(direction, Config::BulletSpeed);
-	bullets.Spawn(muzzle, velocity, Config::BulletRadius);
+	bullets.Spawn(muzzle, velocity, Config::BulletRadius * m_bulletScale);
 
-	m_fireTimer = Config::FireCooldown;
+	m_fireTimer = Config::FireCooldown * m_cooldownScale;
 	return true;
 }
 

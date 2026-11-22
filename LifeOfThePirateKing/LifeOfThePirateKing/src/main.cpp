@@ -1,5 +1,4 @@
-// Life of The Pirate King - entry point and main loop (step 7)
-#include <cstddef>
+#include <string>
 
 #include "raylib.h"
 
@@ -12,14 +11,22 @@
 #include "systems/WaveSpawner.h"
 #include "world/Arena.h"
 #include "world/LevelSequence.h"
+#include "ui/HighScoreTable.h"
+#include "ui/Shop.h"
+
+// Where the high scores are saved, next to the .exe.
+static const char* const HighScoreFile = "highscores.txt";
 
 // What the game is doing right now. Each state has its own update rules.
 enum class GameState
 {
-    Playing,      // in a level
-    LevelClear,   // level beaten, waiting for Enter (the shop goes here in step 8)
-    GameOver,     // out of lives, waiting for Enter
-    Victory       // every level beaten, waiting for Enter
+    Playing,
+    LevelClear,
+    Shop,
+    GameOver,
+    Victory,
+    EnterName,
+    HighScores
 };
 
 // The strip across the top: lives, coins, level name, then the timer or the
@@ -82,10 +89,13 @@ static void DrawDebugOverlay(const Arena& arena, const LevelSequence& levels, in
     const int ty = arena.WorldToTileY(mouse.y);
     if (arena.InBounds(tx, ty))
     {
+        const char* solidText = "no";
+        if (arena.IsSolid(tx, ty))
+            solidText = "yes";
+
         DrawRectangleLinesEx(arena.TileRect(tx, ty), 3.0f, RED);
         DrawText(TextFormat("tile (%d, %d)  index = %d * %d + %d = %d  solid: %s",
-            tx, ty, ty, arena.Width(), tx, arena.Index(tx, ty),
-            arena.IsSolid(tx, ty) ? "yes" : "no"),
+            tx, ty, ty, arena.Width(), tx, arena.Index(tx, ty), solidText),
             10, Config::ScreenHeight - 22, 16, RAYWHITE);
     }
 
@@ -101,6 +111,13 @@ int main()
     ChangeDirectory(GetApplicationDirectory());
 
     const Definitions defs;
+
+    HighScoreTable highScores;
+    if (!highScores.Load(HighScoreFile))
+        TraceLog(LOG_INFO, "No high score file yet - starting a new table");
+
+    Shop        shop;
+    std::string nameEntry;          // what the player has typed so far
 
     LevelSequence levels;
     levels.Build();
@@ -145,10 +162,12 @@ int main()
             state = GameState::Playing;
         };
 
-    // Back to level 1 with full lives and no coins.
+    // Back to level 1 with full lives, no coins and a full shop.
+    // The shop is only restocked here, so stock carries over between bosses.
     auto startNewGame = [&]()
         {
             levels.Restart();
+            shop.Restock();
             player.Reset(arena.PlayerStart());   // startLevel then moves you to the right spot
             startLevel();
         };
@@ -187,7 +206,12 @@ int main()
             // Enemies keep coming until time runs out - or, on a boss
             // level, until the boss is dead.
             const Enemy* boss = enemies.FindFirst(EnemyType::Boss);
-            const bool   spawning = level->isBoss ? (boss != nullptr) : (timeLeft > 0.0f);
+            bool spawning = false;
+            if (level->isBoss)
+                spawning = (boss != nullptr);
+            else
+                spawning = (timeLeft > 0.0f);
+
             if (spawning)
                 spawner.Update(dt, enemies, defs);
 
@@ -223,10 +247,13 @@ int main()
             }
             else
             {
-                const bool goalMet = level->isBoss
-                    ? (enemies.FindFirst(EnemyType::Boss) == nullptr)   // boss is dead
-                    : (timeLeft <= 0.0f);                               // survived the timer
-                if (goalMet && enemies.Count() == 0)                    // and the arena is clear
+                bool goalMet = false;
+                if (level->isBoss)
+                    goalMet = (enemies.FindFirst(EnemyType::Boss) == nullptr);   // boss is dead
+                else
+                    goalMet = (timeLeft <= 0.0f);                               // survived the timer
+
+                if (goalMet && enemies.Count() == 0)                            // and the arena is clear
                     state = GameState::LevelClear;
             }
             break;
@@ -235,16 +262,75 @@ int main()
         case GameState::LevelClear:
             if (IsKeyPressed(KEY_ENTER))
             {
-                // (Step 8 opens the shop here, before the next level.)
-                if (levels.Advance())
-                    startLevel();                // follow the list to the next level
+                if (levels.Next() == nullptr)
+                {
+                    state = GameState::Victory;  // that was the last level
+                }
+                else if (level->isBoss)
+                {
+                    state = GameState::Shop;     // a shop after every boss
+                }
                 else
-                    state = GameState::Victory;  // that was the last one
+                {
+                    levels.Advance();            // normal level: straight on to the next one
+                    startLevel();
+                }
+            }
+            break;
+
+        case GameState::Shop:
+            if (shop.Update(player))             // true when the player leaves
+            {
+                levels.Advance();                // follow the list to the next level
+                startLevel();
             }
             break;
 
         case GameState::GameOver:
         case GameState::Victory:
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                if (highScores.Qualifies(player.Score()))
+                {
+                    nameEntry.clear();
+                    state = GameState::EnterName;
+                }
+                else
+                {
+                    state = GameState::HighScores;
+                }
+            }
+            break;
+
+        case GameState::EnterName:
+        {
+            // GetCharPressed gives each typed character once (it handles
+            // Shift, so 'a' and 'A' both work). 0 means nothing left.
+            int key = GetCharPressed();
+            while (key > 0)
+            {
+                if (key >= 32 && key <= 126 && nameEntry.size() < 12)
+                    nameEntry += static_cast<char>(key);
+                key = GetCharPressed();
+            }
+            if (IsKeyPressed(KEY_BACKSPACE) && !nameEntry.empty())
+                nameEntry.pop_back();
+
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                std::string name = nameEntry;
+                if (name.empty())
+                    name = "Pirate";               // nothing typed: use a default
+
+                highScores.Add(player.Score(), name);
+                if (!highScores.Save(HighScoreFile))
+                    TraceLog(LOG_WARNING, "Could not save high scores to %s", HighScoreFile);
+                state = GameState::HighScores;
+            }
+            break;
+        }
+
+        case GameState::HighScores:
             if (IsKeyPressed(KEY_ENTER))
                 startNewGame();
             break;
@@ -263,18 +349,45 @@ int main()
         if (state == GameState::LevelClear)
         {
             const LevelInfo* next = levels.Next();
-            DrawBanner(level->isBoss ? "BOSS DEFEATED" : "LEVEL CLEAR",
-                TextFormat("Coins: %d", player.Coins()),
-                next ? TextFormat("Press Enter for %s", next->name.c_str())
-                : "Press Enter to finish");
+
+            const char* title = "LEVEL CLEAR";
+            const char* prompt = "Press Enter to finish";
+            if (level->isBoss)
+                title = "BOSS DEFEATED";
+
+            if (next != nullptr && level->isBoss)
+                prompt = "Press Enter for the shop";
+            else if (next != nullptr)
+                prompt = TextFormat("Press Enter for %s", next->name.c_str());
+
+            DrawBanner(title, TextFormat("Coins: %d", player.Coins()), prompt);
+        }
+        else if (state == GameState::Shop)
+        {
+            shop.Draw(player);
         }
         else if (state == GameState::GameOver)
         {
-            DrawBanner("GAME OVER", TextFormat("Coins: %d", player.Coins()), "Press Enter to play again");
+            DrawBanner("GAME OVER", TextFormat("Score: %d", player.Score()), "Press Enter");
         }
         else if (state == GameState::Victory)
         {
-            DrawBanner("VICTORY", TextFormat("Pirate King! Coins: %d", player.Coins()), "Press Enter to play again");
+            DrawBanner("VICTORY", TextFormat("Pirate King! Score: %d", player.Score()), "Press Enter");
+        }
+        else if (state == GameState::EnterName)
+        {
+            // Blinking cursor: on for half a second, off for half a second
+            const char* cursor = " ";
+            if (static_cast<int>(GetTime() * 2.0) % 2 == 0)
+                cursor = "_";
+
+            DrawBanner("NEW HIGH SCORE!",
+                TextFormat("Name: %s%s", nameEntry.c_str(), cursor),
+                "Type your name, then Enter");
+        }
+        else if (state == GameState::HighScores)
+        {
+            highScores.Draw();
         }
 
         if (showDebug)
