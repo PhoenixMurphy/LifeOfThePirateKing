@@ -79,5 +79,5 @@ void HighScoreTable::Draw() const
     if (m_scores.empty())
         DrawText("No scores yet - be the first!", left, y, 20, GRAY);
 
-    DrawText("Press Enter to play again", left, Config::ScreenHeight - 40, 20, LIGHTGRAY);
+    DrawText("Press Enter for the menu", left, Config::ScreenHeight - 40, 20, LIGHTGRAY);
 }
