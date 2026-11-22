@@ -12,6 +12,13 @@ enum class Tile : unsigned char
 	Gate
 };
 
+enum class Stage
+{
+	Prairie,
+	Forest,
+	Graveyard
+};
+
 struct Gate
 {
 	Vector2 position{ 0.0f,0.0f };
@@ -65,9 +72,24 @@ public:
 		return m_playerStart;
 	}
 
+	Vector2 BossStart() const
+	{
+		return m_bossStart;
+	}
+
 	const std::vector<Gate>& Gates() const
 	{
 		return m_gates;
+	}
+
+	void SetStage(Stage stage)
+	{
+		m_stage = stage;
+	}
+
+	Stage GetStage() const
+	{
+		return m_stage;
 	}
 
 	void Draw() const;
@@ -80,5 +102,7 @@ private:
 	std::vector<Tile> m_tiles;
 
 	Vector2 m_playerStart{ 0.0f, 0.0f };
+	Vector2 m_bossStart{ 0.0f, 0.0f };
+	Stage m_stage = Stage::Prairie;
 	std::vector<Gate> m_gates;
 };

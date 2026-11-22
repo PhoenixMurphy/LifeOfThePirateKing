@@ -6,6 +6,7 @@
 template <typename T>
 class SinglyLinkedList
 {
+public:
 	struct Node
 	{
 		T data;
@@ -13,7 +14,7 @@ class SinglyLinkedList
 	};
 
 	SinglyLinkedList() = default;
-	~SinglyLinkedList() { Clear() };
+	~SinglyLinkedList() { Clear(); };
 
 	// The class owns the raw pointers, no copying
 	SinglyLinkedList(const SinglyLinkedList&) = delete;

@@ -82,6 +82,10 @@ void Arena::LoadFromStrings(const std::vector<std::string>& rows)
                 break;
             case 'P':
                 m_playerStart = TileCentre(x, y); // the tile itself is floor
+                m_bossStart = TileCentre(m_width / 2, 2);
+                break;
+            case 'B':
+                m_bossStart = TileCentre(x, y);      // also floor
                 break;
             default: break;
             }
@@ -194,13 +198,35 @@ bool Arena::CircleHits(Vector2 centre, float radius, bool gatesBlock) const
     return false;
 }
 
+struct Palette
+{
+    Color floorLight;
+    Color floorDark;
+    Color wall;
+    Color wallTop;
+    Color gate;
+};
+
+static Palette PaletteFor(Stage stage)
+{
+    switch (stage)
+    {
+    case Stage::Forest:     // grass and trees
+        return Palette{ { 112, 162,  82, 255 }, { 100, 148,  72, 255 },
+                        {  38,  78,  40, 255 }, {  58, 108,  54, 255 }, {  26,  42,  24, 255 } };
+    case Stage::Graveyard:  // grey earth and headstones
+        return Palette{ { 122, 120, 132, 255 }, { 110, 108, 120, 255 },
+                        {  66,  66,  78, 255 }, {  96,  96, 108, 255 }, {  32,  32,  42, 255 } };
+    case Stage::Prairie:    // sand and rock
+    default:
+        return Palette{ { 224, 198, 142, 255 }, { 214, 186, 128, 255 },
+                        { 112,  78,  48, 255 }, { 140, 100,  64, 255 }, {  58,  40,  30, 255 } };
+    }
+}
+
 void Arena::Draw() const
 {
-    const Color sandLight = { 224, 198, 142, 255 };
-    const Color sandDark = { 214, 186, 128, 255 };
-    const Color wall = { 112,  78,  48, 255 };
-    const Color wallTop = { 140, 100,  64, 255 };
-    const Color gate = { 58,  40,  30, 255 };
+    const Palette p = PaletteFor(m_stage);
 
     for (int y = 0; y < m_height; ++y)
     {
@@ -212,14 +238,14 @@ void Arena::Draw() const
             {
             case Tile::Floor:
                 // Checkerboard so the grid is visible
-                DrawRectangleRec(r, ((x + y) % 2 == 0) ? sandLight : sandDark);
+                DrawRectangleRec(r, ((x + y) % 2 == 0) ? p.floorLight : p.floorDark);
                 break;
             case Tile::Wall:
-                DrawRectangleRec(r, wall);
-                DrawRectangleRec(Rectangle{ r.x + 3, r.y + 3, r.width - 6, r.height - 10 }, wallTop);
+                DrawRectangleRec(r, p.wall);
+                DrawRectangleRec(Rectangle{ r.x + 3, r.y + 3, r.width - 6, r.height - 10 }, p.wallTop);
                 break;
             case Tile::Gate:
-                DrawRectangleRec(r, gate);
+                DrawRectangleRec(r, p.gate);
                 break;
             }
         }

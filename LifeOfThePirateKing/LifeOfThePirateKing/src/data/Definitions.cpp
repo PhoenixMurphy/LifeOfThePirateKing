@@ -34,6 +34,15 @@ Definitions::Definitions()
     brute.coins = 3;
     brute.colour = Color{ 90, 120, 70, 255 };
     m_enemies[EnemyType::Brute] = brute;
+
+    EnemyDef boss;
+    boss.name = "Captain";
+    boss.speed = tile * 1.4f;
+    boss.radius = tile * 0.7f;
+    boss.health = 20;
+    boss.coins = 25;
+    boss.colour = Color{ 120, 40, 140, 255 };
+    m_enemies[EnemyType::Boss] = boss;
 }
 
 const EnemyDef& Definitions::Enemy(EnemyType type) const

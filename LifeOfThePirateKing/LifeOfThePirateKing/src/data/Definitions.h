@@ -7,7 +7,8 @@ enum class EnemyType
 {
 	Crab,
 	Skeleton,
-	Brute
+	Brute,
+	Boss
 };
 
 struct EnemyDef

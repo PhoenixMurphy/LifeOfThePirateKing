@@ -15,5 +15,6 @@ struct Enemy
 	Color colour = WHITE;
 
 	float hitFlash = 0.0f;
+	float ability = 0.0f;
 	bool alive = true;
 };

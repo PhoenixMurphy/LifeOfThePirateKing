@@ -31,6 +31,11 @@ namespace Config
 	constexpr float RespawnDelay = 2.0f;
 	constexpr float HitFlashTime = 0.1f;
 
+	// Constants used for Boss
+	constexpr float BossChargeEvery = 3.5f;
+	constexpr float BossChargeTime = 0.8f;
+	constexpr float BossChargeSpeed = 3.0f;
+
 	//Constants used for the Level
 	constexpr float LevelDuration = 60.0f; // how long you need to survive
 }

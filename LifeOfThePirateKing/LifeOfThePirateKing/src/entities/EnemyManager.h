@@ -12,7 +12,10 @@ class Definitions;
 class EnemyManager
 {
 public:
-	void Spawn(EnemyType type, Vector2 position, const Definitions& defs);
+	
+	Enemy& Spawn(EnemyType type, Vector2 position, const Definitions& defs);
+
+	const Enemy* FindFirst(EnemyType type) const;
 
 	void Update(float dt, Vector2 target, const Arena& arena);
 
